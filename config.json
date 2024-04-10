@@ -1,0 +1,21 @@
+{
+    "bot_token": "",
+    "guilds": ["1177506153551372359"],
+    "status": "Under Development",
+    "authorized_users": [692037157451202692,1154808437243396138],
+    "slot_owner_role": 1213514533038198846,
+    "revoke_on_expire": true,
+    "slot_categories": [{
+        "name": "Category1",
+        "id": "123456789012345678"
+      },
+      {
+        "name": "Category2",
+        "id": "987654321098765432"
+      },
+      {
+        "name": "Category3",
+        "id": "555555555555555555"
+      }
+    ]
+  }

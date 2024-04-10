@@ -1,0 +1,19 @@
+{
+    "slot_channels": [
+        {
+            "channel_id": 123456789012345678,
+            "channel_name": "slot_channel_1",
+            "slot_id": "abc123"
+        },
+        {
+            "channel_id": 987654321098765432,
+            "channel_name": "slot_channel_2",
+            "slot_id": "def456"
+        },
+        {
+            "channel_id": 1221422357147811890,
+            "channel_name": "why",
+            "slot_id": "Fl"
+        }
+    ]
+}
