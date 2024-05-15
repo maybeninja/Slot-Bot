@@ -409,17 +409,22 @@ async def help(ctx):
     if ctx.author.id not in config["authorized_users"]:
         return await ctx.send("Unauthorized")
 
-    help_message = """
-    **Available Commands:**
-    `/gen <channel> <user> <days>` - Generate a key for accessing a slot.
-    `/slots` - View active slots.
-    `/usekey <key> <new_slot_name>` - Use a generated key to access a slot.
-    `/unhold <slot_id> <member> <reason>` - Remove hold from a slot.
-    `/revoke <slot_id> <member> <reason>` - Revoke access to a slot.
-    `/hold <slot_id> <member> <reason>` - Put a slot on hold.
-    `/createslot <slot_name>` - Create a new slot."""
+    help_embed = discord.Embed(title="Available Commands", color=discord.Color.dark_grey())
 
-    await ctx.send(help_message)
+    help_embed.add_field(name="/gen <channel> <user> <days>", value="Generate a key for accessing a slot.", inline=False)
+    help_embed.add_field(name="/slots", value="View active slots.", inline=False)
+    help_embed.add_field(name="/usekey <key> <new_slot_name>", value="Use a generated key to access a slot.", inline=False)
+    help_embed.add_field(name="/unhold <slot_id> <member> <reason>", value="Remove hold from a slot.", inline=False)
+    help_embed.add_field(name="/revoke <slot_id> <member> <reason>", value="Revoke access to a slot.", inline=False)
+    help_embed.add_field(name="/hold <slot_id> <member> <reason>", value="Put a slot on hold.", inline=False)
+    help_embed.add_field(name="/createslot <slot_name>", value="Create a new slot.", inline=False)
+
+    help_embed.set_footer(text="Replace <...> with appropriate parameters.")
+
+    await ctx.send(embed=help_embed)
+
+
+   
 
 
 
