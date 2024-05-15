@@ -70,7 +70,7 @@ async def on_ready():
     update_slots.start()
     print(f"{bot.user} is online!")
 
-@bot.command()
+@bot.slash_command()
 async def gen(ctx, channel: discord.TextChannel, user: discord.Member, days: int):
     if ctx.author.id not in config["authorized_users"]:
         await ctx.send("Unauthorised")
@@ -123,7 +123,7 @@ async def gen(ctx, channel: discord.TextChannel, user: discord.Member, days: int
         await ctx.send(f"An error occurred: {e}")
 
 
-@bot.command()
+@bot.slash_command()
 async def slots(ctx):
     if ctx.author.id not in config["authorized_users"]:
         await ctx.send("Unauthorized")
@@ -183,7 +183,7 @@ async def get_slot_owner_id(key):
     
     return "Unknown"
 
-@bot.command()
+@bot.slash_command()
 async def usekey(ctx, key, new_slot_name):
     try:
         with open('slot_keys.json', 'r') as f:
@@ -258,7 +258,7 @@ async def usekey(ctx, key, new_slot_name):
         await ctx.send(f"An error occurred: {e}")
 
 
-@bot.command()
+@bot.slash_command()
 async def unhold(ctx, slot_id: str, member: discord.Member, *, reason):
     if ctx.author.id not in config["authorized_users"]:
         await ctx.send("Unauthorized")
@@ -294,7 +294,7 @@ async def unhold(ctx, slot_id: str, member: discord.Member, *, reason):
     except Exception as e:
         await ctx.send(f"An error occurred: {e}")
 
-@bot.command()
+@bot.slash_command()
 async def revoke(ctx, slot_id: str, member: discord.Member, *, reason):
     if ctx.author.id not in config["authorized_users"]:
         await ctx.send("Unauthorized")
@@ -331,7 +331,7 @@ async def revoke(ctx, slot_id: str, member: discord.Member, *, reason):
     except Exception as e:
         await ctx.send(f"An error occurred: {e}")
 
-@bot.command()
+@bot.slash_command()
 async def hold(ctx, slot_id: str, member: discord.Member, *, reason):
     if ctx.author.id not in config["authorized_users"]:
         await ctx.send("Unauthorized")
@@ -367,7 +367,7 @@ async def hold(ctx, slot_id: str, member: discord.Member, *, reason):
     except Exception as e:
         await ctx.send(f"An error occurred: {e}")
 
-@bot.command()
+@bot.slash_command()
 async def createslot(ctx, slot_name: str):
     if ctx.author.id not in config["authorized_users"]:
         return await ctx.send("Unauthorized")
@@ -403,124 +403,25 @@ async def createslot(ctx, slot_name: str):
     except Exception as e:
         await ctx.send(f"An error occurred: {e}")
 
-@bot.command()
-async def backupslots(ctx, category_id: int, position: int):
-    if ctx.author.id not in config["authorized_users"]:
-        return await ctx.send("Unauthorized")
 
-    guild = ctx.guild
-    slots_to_backup = []
-
-    for channel in guild.channels:
-        if isinstance(channel, discord.TextChannel) and channel.category_id == category_id and channel.position == position:
-            slots_to_backup.append(channel)
-
-    backup_data = []
-    for slot in slots_to_backup:
-        slot_data = {
-            "name": slot.name,
-            "permissions": {over[0].id: over[1].pair() for over in slot.overwrites}
-        }
-        backup_data.append(slot_data)
-        await slot.delete()
-
-    with open('slot_backup.json', 'w') as f:
-        json.dump(backup_data, f, indent=4)
-
-    await ctx.send("Slots backed up successfully!")
-
-@bot.command()
-async def restoreslots(ctx):
-    if ctx.author.id not in config["authorized_users"]:
-        return await ctx.send("Unauthorized")
-
-    try:
-        with open('slot_backup.json', 'r') as f:
-            backup_data = json.load(f)
-
-        for slot_data in backup_data:
-            overwrites = {}
-            for target_id, overwrite in slot_data["permissions"].items():
-                target = ctx.guild.get_role(target_id) or ctx.guild.get_member(target_id)
-                if target:
-                    overwrites[target] = discord.PermissionOverwrite(**overwrite)
-
-            category = ctx.guild.get_channel(config["slot_category"])
-            if not category or not isinstance(category, discord.CategoryChannel):
-                return await ctx.send("Slot category not found or invalid.")
-
-            slot_channel = await category.create_text_channel(name=slot_data["name"], overwrites=overwrites)
-        
-        await ctx.send("Slots restored successfully!")
-
-    except FileNotFoundError:
-        await ctx.send("No slot backup found.")
-
-    except Exception as e:
-    
-        await ctx.send(f"An error occurred: {e}")
-
-
-
-@bot.command()
+@bot.slash_command()
 async def help(ctx):
-    embed = discord.Embed(
-        title="Bot Commands",
-        description="Here are the available commands for this bot:",
-        color=discord.Color.blue()
-    )
-    embed.add_field(
-        name=".gen",
-        value="Generate a key for a slot. Usage: `.gen <channel_mention> <user_mention> <days>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".usekey",
-        value="Use a generated key to access a slot. Usage: `.usekey <key> <new_slot_name>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".hold",
-        value="Put a slot on hold. Usage: `.hold <slot_id> <user_mention> <reason>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".unhold",
-        value="Remove hold from a slot. Usage: `.unhold <slot_id> <user_mention> <reason>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".revoke",
-        value="Revoke a slot. Usage: `.revoke <slot_id> <user_mention> <reason>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".createslot",
-        value="Create a new slot. Usage: `.createslot <slot_name>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".backupslots",
-        value="Backup slots with the same category and position. Usage: `.backupslots <category_id> <position>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".restoreslots",
-        value="Restore previously backed up slots. Usage: `.restoreslots`",
-        inline=False
-    )
-    embed.add_field(
-        name=".syncslot",
-        value="Sync permissions for a slot. Usage: `.syncslot <slot_id>`",
-        inline=False
-    )
-    embed.add_field(
-        name=".slots",
-        value="View active slots. Usage: `.slots`",
-        inline=False
-    )
+    if ctx.author.id not in config["authorized_users"]:
+        return await ctx.send("Unauthorized")
 
-    await ctx.send(embed=embed)
+    help_message = """
+    **Available Commands:**
+    `/gen <channel> <user> <days>` - Generate a key for accessing a slot.
+    `/slots` - View active slots.
+    `/usekey <key> <new_slot_name>` - Use a generated key to access a slot.
+    `/unhold <slot_id> <member> <reason>` - Remove hold from a slot.
+    `/revoke <slot_id> <member> <reason>` - Revoke access to a slot.
+    `/hold <slot_id> <member> <reason>` - Put a slot on hold.
+    `/createslot <slot_name>` - Create a new slot."""
+
+    await ctx.send(help_message)
+
+
 
 
 bot.run(config['bot_token'])
